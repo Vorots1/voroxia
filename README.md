@@ -16,23 +16,26 @@ SaaS de auditoría de chatbots de IA. 82 preguntas, 6 dimensiones, score legal +
 - **Auth + DB:** Supabase SSR
 - **Pagos:** Stripe
 - **IA:** Anthropic SDK (Claude)
-- **PDF:** @react-pdf/renderer
+- **PDF:** @react-pdf/renderer v4
 
 ---
 
-## Estado del build (pasos completados)
+## Estado del build
 
-| PASO | Estado | Descripción |
-|------|--------|-------------|
-| 1 — Init | ✅ | Estructura base, motor de auditoría, tipos, schema Supabase |
-| 2 — Auth | ✅ | Login/Register SSR, layout dashboard, middleware |
-| 3 — Engine API | ✅ | API routes: create, plan, execute, evaluate |
-| 4 — Dashboard | ✅ | Wizard 4 pasos, KPIs, `/audits/[id]` resultado completo |
-| 5 — Landing | ✅ | Landing page completa con countdown EU AI Act, pricing, FAQ |
-| 6 — Stripe | 🔄 En curso | Checkout, portal, webhook, página de upgrade |
-| 7 — PDF | ⏳ Pendiente | Exportar informe a PDF |
-| 8 — Re-auditoría | ⏳ Pendiente | Cron automático para planes Pro/Enterprise |
-| 9 — API pública | ⏳ Pendiente | API key autenticada para integraciones Enterprise |
+| PASO | Estado | Commits |
+|------|--------|---------|
+| 1 — Init + motor | ✅ | `e17fa66` |
+| 2 — Auth | ✅ | `77bc1f9` |
+| 3 — Engine API | ✅ | `67b8a49` |
+| 4 — Dashboard + wizard | ✅ | `84b8d06` |
+| 5 — Landing page | ✅ | `3a46052` |
+| 6 — Stripe (suscripciones + extras) | ✅ | `bf67154`, `9d98e1b` |
+| 7 — PDF export | ✅ | `cfd99cc` |
+| 8 — Re-auditoría automática (cron) | ✅ | `9d70eb8` |
+| 9 — API pública v1 (Enterprise) | 🔄 En curso | — |
+| 10 — Certificado cumplimiento EU AI Act | ⏳ | — |
+| 11 — Alertas de regresión por email | ⏳ | — |
+| 12 — Onboarding tour | ⏳ | — |
 
 ---
 
@@ -40,57 +43,52 @@ SaaS de auditoría de chatbots de IA. 82 preguntas, 6 dimensiones, score legal +
 
 ```
 app/
-  page.tsx                    # Landing page (estática)
-  layout.tsx                  # Root layout + SEO metadata
-  (auth)/
-    login/                    # Login Supabase
-    register/                 # Registro
+  page.tsx                        # Landing page (estática)
+  layout.tsx                      # Root layout + SEO metadata
+  (auth)/login, register          # Auth Supabase SSR
   (dashboard)/
-    layout.tsx                # Sidebar + auth guard
-    dashboard/                # Panel KPIs + auditorías recientes
-    audits/
-      page.tsx                # Lista de auditorías
-      new/                    # Wizard nueva auditoría
-      [id]/                   # Resultado completo
-    pricing/                  # Upgrade de plan (PASO 6)
-    settings/                 # Configuración + billing
-    contact/                  # Solicitar reparación
+    layout.tsx                    # Sidebar + auth guard
+    dashboard/                    # Panel KPIs + auditorías recientes
+    audits/page, new, [id]        # Lista, wizard, resultado
+    pricing/                      # Upgrade de plan
+    settings/                     # Cuenta + billing + API key (PASO 9)
+    contact/                      # Solicitar reparación
   api/
-    audit/
-      create/                 # POST: crear auditoría
-      plan/                   # POST: generar plan de preguntas
-      execute/                # POST: ejecutar fase
-      evaluate/               # POST: evaluar respuestas
-    stripe/
-      checkout/               # POST: crear sesión de checkout (PASO 6)
-      portal/                 # POST: customer portal (PASO 6)
-    webhooks/
-      stripe/                 # POST: webhook Stripe (PASO 6)
+    audit/create, plan, execute, evaluate   # Pipeline motor
+    audit/pdf                               # Export PDF
+    stripe/checkout, portal, extra          # Pagos
+    webhooks/stripe                         # Webhook Stripe
+    cron/reaudit                            # Re-auditoría automática
+    v1/audit                                # API pública Enterprise (PASO 9)
+    v1/audit/[id]                           # Resultado via API (PASO 9)
+    v1/audit/[id]/pdf                       # PDF via API (PASO 9)
 
 components/
-  ui/                         # Shadcn components
-  dashboard/                  # Sidebar, AuditRow, CountdownBanner
-  audit/                      # ScoreGauge, Step1-4
-  landing/                    # LandingCountdown
+  ui/                             # Shadcn
+  dashboard/Sidebar, AuditRow, CountdownBanner, BillingPortalButton, BuyExtrasButton
+  audit/ScoreGauge, Step1-4, DownloadPDFButton
+  landing/LandingCountdown
 
 lib/
-  anthropic.ts                # Cliente Anthropic
-  audit-engine.ts             # Motor de auditoría
-  prompts.ts                  # Prompts del motor
-  scoring.ts                  # Clasificación de scores
-  rate-limiter.ts             # Rate limiting por usuario
-  stripe.ts                   # Cliente Stripe + price IDs (PASO 6)
-  supabase.ts                 # Cliente Supabase (cliente)
-  supabase-server.ts          # Cliente Supabase (servidor SSR)
+  anthropic.ts                    # Cliente Anthropic
+  audit-engine.ts                 # generateAuditPlan, executeAuditWithSystemPrompt, evaluateAudit
+  prompts.ts                      # Prompts del motor
+  scoring.ts                      # Clasificación, PHASE_NAMES, PHASE_WEIGHTS
+  rate-limiter.ts                 # checkAuditLimit por plan
+  stripe.ts                       # Cliente Stripe, getPriceId, getExtraPriceId
+  api-key.ts                      # Generar/hashear/verificar API keys (PASO 9)
+  supabase.ts / supabase-server.ts
 
 types/
-  index.ts                    # Tipos + PLAN_LIMITS + PLAN_PRICES
-  database.ts                 # Tipos Supabase generados
+  index.ts    # Plan, PLAN_LIMITS, PLAN_PRICES, EXTRA_AUDIT_PRICES, Audit, User...
+  database.ts # Tipos Supabase
+
+vercel.json   # Cron: 0 3 * * * → /api/cron/reaudit
 ```
 
 ---
 
-## Variables de entorno
+## Variables de entorno (todas en Vercel)
 
 ```bash
 # Supabase
@@ -101,12 +99,18 @@ SUPABASE_SERVICE_ROLE_KEY=
 # Anthropic
 ANTHROPIC_API_KEY=
 
-# Stripe
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-STRIPE_PRICE_STARTER=
-STRIPE_PRICE_PROFESSIONAL=
-STRIPE_PRICE_ENTERPRISE=
+# Stripe — 8 variables
+STRIPE_SECRET_KEY=              # sk_live_... (Developers → API keys)
+STRIPE_WEBHOOK_SECRET=          # whsec_...  (Developers → Webhooks → Signing secret)
+STRIPE_PRICE_STARTER=           # price_...  (€79/mes, recurring)
+STRIPE_PRICE_PROFESSIONAL=      # price_...  (€199/mes, recurring)
+STRIPE_PRICE_ENTERPRISE=        # price_...  (€499/mes, recurring)
+STRIPE_PRICE_EXTRA_STARTER=     # price_...  (€9,90, one-time)
+STRIPE_PRICE_EXTRA_PROFESSIONAL=# price_...  (€7,90, one-time)
+STRIPE_PRICE_EXTRA_ENTERPRISE=  # price_...  (€5,90, one-time)
+
+# Cron
+CRON_SECRET=                    # string aleatorio largo
 
 # App
 NEXT_PUBLIC_APP_URL=https://voroxia.com
@@ -116,9 +120,28 @@ NEXT_PUBLIC_APP_URL=https://voroxia.com
 
 ## Planes y precios
 
-| Plan | Precio | Auditorías/mes | Preguntas | Fases |
-|------|--------|----------------|-----------|-------|
-| Free | €0 | 1 | 20 | 3 |
-| Starter | €79/mes | 10 | 82 | 6 |
-| Professional | €199/mes | 30 | 82 | 6 + re-audit semanal |
-| Enterprise | €499/mes | 100 | 82 | 6 + re-audit diaria + API + cert |
+| Plan | Precio | Auditorías/mes | Preguntas | Fases | Extras incluidos |
+|------|--------|----------------|-----------|-------|-----------------|
+| Free | €0 | 1 | 20 | 3 | — |
+| Starter | €79/mes | 10 | 82 | 6 | €9,90/ud |
+| Professional | €199/mes | 30 | 82 | 6 + re-audit semanal | €7,90/ud |
+| Enterprise | €499/mes | 100 | 82 | 6 + re-audit diaria + API | €5,90/ud |
+
+---
+
+## Cron de re-auditoría
+
+- Ejecuta cada día a 03:00 UTC
+- **Professional:** re-audita si última auditoría completada > 7 días
+- **Enterprise:** re-audita si última auditoría completada > 24 horas
+- Solo auditorías con `system_prompt` (no manuales)
+- Anti-duplicado: salta usuarios con auditoría creada ese día
+- Detecta regresión si score nuevo < score anterior - 10 puntos
+
+## API pública v1 (Enterprise)
+
+- Autenticación por `Authorization: Bearer vx_live_<key>`
+- `POST /api/v1/audit` — lanzar auditoría
+- `GET  /api/v1/audit/:id` — consultar resultado
+- `GET  /api/v1/audit/:id/pdf` — descargar PDF
+- API keys gestionadas desde `/settings`

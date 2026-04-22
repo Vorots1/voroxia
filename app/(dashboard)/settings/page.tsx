@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { PLAN_LIMITS, type Plan } from '@/types'
 import BillingPortalButton from '@/components/dashboard/BillingPortalButton'
+import ApiKeyManager from '@/components/dashboard/ApiKeyManager'
 
 export default async function SettingsPage() {
   const supabase = await createServerSupabaseClient()
@@ -57,6 +58,16 @@ export default async function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      {plan === 'enterprise' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">API key</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ApiKeyManager />
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
