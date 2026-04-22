@@ -15,10 +15,11 @@ import AuditRow from '@/components/dashboard/AuditRow'
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ upgraded?: string }>
+  searchParams: Promise<{ upgraded?: string; extras?: string }>
 }) {
   const params = await searchParams
   const justUpgraded = params.upgraded === '1'
+  const extrasAdded = params.extras ? parseInt(params.extras, 10) : 0
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -52,6 +53,17 @@ export default async function DashboardPage({
           <div>
             <p className="text-sm font-semibold text-green-800">Plan actualizado correctamente</p>
             <p className="text-xs text-green-600 mt-0.5">Tu nuevo plan ya está activo. Las auditorías adicionales ya están disponibles.</p>
+          </div>
+        </div>
+      )}
+      {extrasAdded > 0 && (
+        <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-5 py-4">
+          <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-green-800">
+              {extrasAdded} auditoría{extrasAdded > 1 ? 's' : ''} adicional{extrasAdded > 1 ? 'es' : ''} añadida{extrasAdded > 1 ? 's' : ''}
+            </p>
+            <p className="text-xs text-green-600 mt-0.5">Ya puedes usarlas desde el panel.</p>
           </div>
         </div>
       )}

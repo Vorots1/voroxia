@@ -11,8 +11,18 @@ const PRICE_IDS: Record<Exclude<Plan, 'free'>, string> = {
   enterprise: process.env.STRIPE_PRICE_ENTERPRISE!,
 }
 
+const EXTRA_PRICE_IDS: Record<Exclude<Plan, 'free'>, string> = {
+  starter: process.env.STRIPE_PRICE_EXTRA_STARTER!,
+  professional: process.env.STRIPE_PRICE_EXTRA_PROFESSIONAL!,
+  enterprise: process.env.STRIPE_PRICE_EXTRA_ENTERPRISE!,
+}
+
 export function getPriceId(plan: Exclude<Plan, 'free'>): string {
   return PRICE_IDS[plan]
+}
+
+export function getExtraPriceId(plan: Exclude<Plan, 'free'>): string {
+  return EXTRA_PRICE_IDS[plan]
 }
 
 export function getPlanFromPriceId(priceId: string): Plan {

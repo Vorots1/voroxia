@@ -39,18 +39,32 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
-      if (session.mode !== 'subscription') break
-
       const userId = session.metadata?.user_id
-      const plan = session.metadata?.plan
-      if (!userId || !plan) break
+      if (!userId) break
 
-      await service.from('users').update({
-        stripe_customer_id: session.customer as string,
-        stripe_subscription_id: session.subscription as string,
-        plan,
-        audits_remaining: plan === 'starter' ? 10 : plan === 'professional' ? 30 : 100,
-      }).eq('id', userId)
+      if (session.mode === 'subscription') {
+        const plan = session.metadata?.plan
+        if (!plan) break
+        await service.from('users').update({
+          stripe_customer_id: session.customer as string,
+          stripe_subscription_id: session.subscription as string,
+          plan,
+          audits_remaining: plan === 'starter' ? 10 : plan === 'professional' ? 30 : 100,
+        }).eq('id', userId)
+      } else if (session.mode === 'payment') {
+        // Compra puntual de auditorías extra
+        const extra = parseInt(session.metadata?.extra_audits ?? '0', 10)
+        if (extra > 0) {
+          const { data: current } = await service
+            .from('users')
+            .select('audits_remaining')
+            .eq('id', userId)
+            .single() as { data: { audits_remaining: number } | null }
+          await service.from('users').update({
+            audits_remaining: (current?.audits_remaining ?? 0) + extra,
+          }).eq('id', userId)
+        }
+      }
       break
     }
 
