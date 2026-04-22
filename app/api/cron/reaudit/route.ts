@@ -6,6 +6,7 @@ import {
   evaluateAudit,
 } from '@/lib/audit-engine'
 import { calculateGlobalScore, getClassification } from '@/lib/scoring'
+import { sendRegressionAlert, sendReauditSummary } from '@/lib/email'
 import type { AuditPlanQuestion } from '@/types'
 
 export const runtime = 'nodejs'
@@ -176,10 +177,10 @@ export async function GET(req: NextRequest) {
   for (const [plan, interval] of Object.entries(PLAN_INTERVALS)) {
     const cutoff = new Date(now - interval).toISOString()
 
-    // Obtener usuarios del plan con al menos una auditoría completada antes del cutoff
+    // Obtener usuarios del plan con email (necesario para alertas)
     const { data: users } = await service
       .from('users')
-      .select('id')
+      .select('id, email')
       .eq('plan', plan)
 
     if (!users?.length) continue
@@ -223,6 +224,32 @@ export async function GET(req: NextRequest) {
       const result = await runReaudit(service, lastAudit as Record<string, unknown>, user.id)
       if (result) {
         results.push({ userId: user.id, ...result })
+
+        // Enviar email si hay RESEND_API_KEY configurada
+        if (process.env.RESEND_API_KEY && (user as { id: string; email?: string }).email) {
+          const email = (user as { id: string; email: string }).email
+          const assistantName = (lastAudit as Record<string, unknown>).assistant_name as string
+          try {
+            if (result.regression) {
+              await sendRegressionAlert({
+                to: email,
+                assistantName,
+                previousScore: result.previousScore,
+                newScore: result.score,
+                auditId: result.auditId,
+              })
+            } else {
+              await sendReauditSummary({
+                to: email,
+                assistantName,
+                score: result.score,
+                auditId: result.auditId,
+              })
+            }
+          } catch (emailErr) {
+            console.error('[reaudit] Email error for', user.id, emailErr)
+          }
+        }
       }
     }
   }
