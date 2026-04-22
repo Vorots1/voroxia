@@ -12,6 +12,7 @@ import {
 } from '@/lib/scoring'
 import ScoreGauge from '@/components/audit/ScoreGauge'
 import DownloadPDFButton from '@/components/audit/DownloadPDFButton'
+import DownloadCertificateButton from '@/components/audit/DownloadCertificateButton'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Wrench, ChevronDown } from 'lucide-react'
@@ -24,6 +25,7 @@ export default async function AuditResultPage({ params }: { params: Promise<{ id
 
   const service = createServiceClient()
   const { data: audit } = await service.from('audits').select('*').eq('id', id).eq('user_id', user.id).single()
+  const { data: profile } = await service.from('users').select('plan').eq('id', user.id).single() as { data: { plan: string } | null }
   if (!audit) notFound()
 
   if (audit.status !== 'completed') {
@@ -66,6 +68,9 @@ export default async function AuditResultPage({ params }: { params: Promise<{ id
         </div>
         <div className="flex gap-2 flex-shrink-0 flex-wrap">
           <DownloadPDFButton auditId={id} />
+          {profile?.plan === 'enterprise' && (
+            <DownloadCertificateButton auditId={id} />
+          )}
           <Link href="/contact">
             <Button variant="outline" size="sm" className="gap-1.5">
               <Wrench className="h-3.5 w-3.5" />
