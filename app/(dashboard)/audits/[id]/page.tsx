@@ -11,9 +11,10 @@ import {
   getClassificationLabel, PHASE_NAMES, PHASE_ICONS,
 } from '@/lib/scoring'
 import ScoreGauge from '@/components/audit/ScoreGauge'
+import DownloadPDFButton from '@/components/audit/DownloadPDFButton'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Download, RefreshCw, Wrench, ChevronDown } from 'lucide-react'
+import { Wrench, ChevronDown } from 'lucide-react'
 
 export default async function AuditResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -63,7 +64,8 @@ export default async function AuditResultPage({ params }: { params: Promise<{ id
             {audit.sector} · {format(new Date(audit.created_at), "d MMMM yyyy", { locale: es })}
           </p>
         </div>
-        <div className="flex gap-2 flex-shrink-0">
+        <div className="flex gap-2 flex-shrink-0 flex-wrap">
+          <DownloadPDFButton auditId={id} />
           <Link href="/contact">
             <Button variant="outline" size="sm" className="gap-1.5">
               <Wrench className="h-3.5 w-3.5" />
