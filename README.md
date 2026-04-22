@@ -22,20 +22,22 @@ SaaS de auditoría de chatbots de IA. 82 preguntas, 6 dimensiones, score legal +
 
 ## Estado del build
 
-| PASO | Estado | Commits |
-|------|--------|---------|
+| PASO | Estado | Commit |
+|------|--------|--------|
 | 1 — Init + motor | ✅ | `e17fa66` |
 | 2 — Auth | ✅ | `77bc1f9` |
 | 3 — Engine API | ✅ | `67b8a49` |
 | 4 — Dashboard + wizard | ✅ | `84b8d06` |
 | 5 — Landing page | ✅ | `3a46052` |
-| 6 — Stripe (suscripciones + extras) | ✅ | `bf67154`, `9d98e1b` |
+| 6 — Stripe (suscripciones + extras) | ✅ | `bf67154` |
 | 7 — PDF export | ✅ | `cfd99cc` |
 | 8 — Re-auditoría automática (cron) | ✅ | `9d70eb8` |
-| 9 — API pública v1 (Enterprise) | 🔄 En curso | — |
-| 10 — Certificado cumplimiento EU AI Act | ⏳ | — |
-| 11 — Alertas de regresión por email | ⏳ | — |
-| 12 — Onboarding tour | ⏳ | — |
+| 9 — API pública v1 Enterprise | ✅ | `84408dc` |
+| 10 — Certificado EU AI Act | ✅ | `b9d0aa9` |
+| 11 — Alertas de regresión (Resend) | ✅ | `6ddb1f8` |
+| 12 — Onboarding tour | ✅ | `1103815` |
+| 13 — Blog SEO EU AI Act | ✅ | `dea801f` |
+| 🔒 Seguridad (headers, proxy, RLS, Zod) | ✅ | `219340d` |
 
 ---
 
@@ -65,8 +67,9 @@ app/
 
 components/
   ui/                             # Shadcn
-  dashboard/Sidebar, AuditRow, CountdownBanner, BillingPortalButton, BuyExtrasButton
-  audit/ScoreGauge, Step1-4, DownloadPDFButton
+  dashboard/Sidebar, AuditRow, CountdownBanner, BillingPortalButton,
+           BuyExtrasButton, ApiKeyManager, OnboardingModal
+  audit/ScoreGauge, Step1-4, DownloadPDFButton, DownloadCertificateButton
   landing/LandingCountdown
 
 lib/
@@ -76,13 +79,17 @@ lib/
   scoring.ts                      # Clasificación, PHASE_NAMES, PHASE_WEIGHTS
   rate-limiter.ts                 # checkAuditLimit por plan
   stripe.ts                       # Cliente Stripe, getPriceId, getExtraPriceId
-  api-key.ts                      # Generar/hashear/verificar API keys (PASO 9)
+  api-key.ts                      # Generar/hashear/verificar API keys
+  email.ts                        # sendRegressionAlert, sendReauditSummary (Resend)
+  blog.ts                         # Artículos estáticos EU AI Act
+  validation.ts                   # Schemas Zod para inputs críticos
   supabase.ts / supabase-server.ts
 
 types/
   index.ts    # Plan, PLAN_LIMITS, PLAN_PRICES, EXTRA_AUDIT_PRICES, Audit, User...
   database.ts # Tipos Supabase
 
+proxy.ts      # Auth guard edge + rate limiting + CORS (Next.js 16)
 vercel.json   # Cron: 0 3 * * * → /api/cron/reaudit
 ```
 
@@ -111,6 +118,9 @@ STRIPE_PRICE_EXTRA_ENTERPRISE=  # price_...  (€5,90, one-time)
 
 # Cron
 CRON_SECRET=                    # string aleatorio largo
+
+# Email (alertas de regresión)
+RESEND_API_KEY=                 # resend.com → API Keys
 
 # App
 NEXT_PUBLIC_APP_URL=https://voroxia.com
