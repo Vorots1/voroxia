@@ -32,7 +32,7 @@ function Navbar() {
           <a href="#como-funciona" className="hover:text-white transition-colors">Cómo funciona</a>
           <a href="#fases" className="hover:text-white transition-colors">Qué analiza</a>
           <a href="#precios" className="hover:text-white transition-colors">Precios</a>
-          <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+          <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -660,6 +660,7 @@ function Footer() {
           <nav className="flex flex-wrap justify-center gap-6 text-sm text-slate-500">
             <a href="#como-funciona" className="hover:text-slate-300 transition-colors">Cómo funciona</a>
             <a href="#precios" className="hover:text-slate-300 transition-colors">Precios</a>
+            <Link href="/blog" className="hover:text-slate-300 transition-colors">Blog</Link>
             <Link href="/contact" className="hover:text-slate-300 transition-colors">Contacto</Link>
             <Link href="/login" className="hover:text-slate-300 transition-colors">Entrar</Link>
           </nav>
