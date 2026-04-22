@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase-server'
 import { checkAuditLimit } from '@/lib/rate-limiter'
+import { CreateAuditSchema } from '@/lib/validation'
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,12 +17,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: limit.reason, upsell_plan: limit.upsell_plan }, { status: 402 })
     }
 
-    const body = await req.json()
-    const { assistant_name, company_name, company_url, sector, language, country, system_prompt, connection_type } = body
-
-    if (!assistant_name || !sector || !language || !country || !connection_type) {
-      return NextResponse.json({ error: 'Faltan campos obligatorios' }, { status: 400 })
+    let rawBody: unknown
+    try {
+      rawBody = await req.json()
+    } catch {
+      return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
     }
+
+    const parsed = CreateAuditSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      )
+    }
+
+    const { assistant_name, company_name, company_url, sector, language, country, system_prompt, connection_type } = parsed.data
 
     const service = createServiceClient()
     const { data: audit, error } = await service.from('audits').insert({

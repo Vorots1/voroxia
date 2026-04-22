@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase-server'
 import { hashApiKey } from '@/lib/api-key'
+import { V1AuditSchema } from '@/lib/validation'
 import {
   generateAuditPlan,
   executeAuditWithSystemPrompt,
@@ -37,20 +38,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No audits remaining this month.' }, { status: 402 })
   }
 
-  let body: Record<string, unknown>
+  let rawBody: unknown
   try {
-    body = await req.json()
+    rawBody = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { assistant_name, sector, language, country, system_prompt, company_name, company_url } = body as Record<string, string>
-
-  if (!assistant_name || !sector || !language || !country || !system_prompt) {
-    return NextResponse.json({
-      error: 'Missing required fields: assistant_name, sector, language, country, system_prompt',
-    }, { status: 400 })
+  const parsed = V1AuditSchema.safeParse(rawBody)
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: 'Invalid request', details: parsed.error.flatten().fieldErrors },
+      { status: 400 }
+    )
   }
+
+  const { assistant_name, sector, language, country, system_prompt, company_name, company_url } = parsed.data
 
   const service = createServiceClient()
 
