@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import Sidebar from '@/components/dashboard/Sidebar'
+import OnboardingModal from '@/components/dashboard/OnboardingModal'
+import type { User } from '@/types'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient()
@@ -12,7 +14,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .from('users')
     .select('*')
     .eq('id', user.id)
-    .single()
+    .single() as { data: User | null }
+
+  const showOnboarding = !profile?.onboarding_completed
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -22,6 +26,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {children}
         </div>
       </main>
+      <OnboardingModal show={showOnboarding} />
     </div>
   )
 }

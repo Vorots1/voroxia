@@ -50,6 +50,8 @@ export interface User {
   audits_remaining: number
   audits_used_this_month: number
   current_period_start: string
+  onboarding_completed: boolean | null
+  api_key_hash: string | null
   created_at: string
   updated_at: string
 }
