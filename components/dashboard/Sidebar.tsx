@@ -14,6 +14,7 @@ import {
   MessageSquare,
   LogOut,
   Shield,
+  Zap,
 } from 'lucide-react'
 
 const NAV = [
@@ -23,6 +24,8 @@ const NAV = [
   { href: '/contact', label: 'Solicitar reparación', icon: MessageSquare },
   { href: '/settings', label: 'Configuración', icon: Settings },
 ]
+
+const NAV_UPGRADE = { href: '/pricing', label: 'Actualizar plan', icon: Zap }
 
 const PLAN_COLORS: Record<string, string> = {
   free: 'bg-gray-100 text-gray-700',
@@ -78,6 +81,20 @@ export default function Sidebar({ user }: { user: User | null }) {
       </nav>
 
       <div className="p-4 border-t border-gray-100">
+        {user && user.plan === 'free' && (
+          <Link
+            href={NAV_UPGRADE.href}
+            className={cn(
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors mb-2',
+              pathname === NAV_UPGRADE.href
+                ? 'bg-blue-50 text-blue-700'
+                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+            )}
+          >
+            <NAV_UPGRADE.icon className="h-4 w-4 flex-shrink-0" />
+            {NAV_UPGRADE.label}
+          </Link>
+        )}
         {user && (
           <div className="mb-3 px-3 py-2 bg-gray-50 rounded-lg">
             <p className="text-xs text-gray-500">Auditorías este mes</p>

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { PLAN_LIMITS, type Plan } from '@/types'
+import BillingPortalButton from '@/components/dashboard/BillingPortalButton'
 
 export default async function SettingsPage() {
   const supabase = await createServerSupabaseClient()
@@ -40,13 +41,14 @@ export default async function SettingsPage() {
       <Card>
         <CardHeader><CardTitle className="text-base">Plan actual</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <Badge className="text-sm px-3 py-1 capitalize">{plan}</Badge>
             {plan !== 'enterprise' && (
               <Link href="/pricing">
                 <Button variant="outline" size="sm">Actualizar plan</Button>
               </Link>
             )}
+            {plan !== 'free' && <BillingPortalButton />}
           </div>
           <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-2">
             <p><span className="text-gray-500">Auditorías al mes:</span> <strong>{plan === 'free' ? '1 (total)' : limits.audits_per_month}</strong></p>

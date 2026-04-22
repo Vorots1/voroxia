@@ -6,13 +6,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { getClassificationLabel, getScoreBadgeColor } from '@/lib/scoring'
+import { getClassificationLabel } from '@/lib/scoring'
 import { PLAN_LIMITS, type Plan } from '@/types'
-import { PlusCircle, AlertTriangle, TrendingUp, Clock } from 'lucide-react'
+import { PlusCircle, AlertTriangle, TrendingUp, Clock, CheckCircle2 } from 'lucide-react'
 import CountdownBanner from '@/components/dashboard/CountdownBanner'
 import AuditRow from '@/components/dashboard/AuditRow'
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ upgraded?: string }>
+}) {
+  const params = await searchParams
+  const justUpgraded = params.upgraded === '1'
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -40,6 +46,15 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {justUpgraded && (
+        <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-5 py-4">
+          <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-green-800">Plan actualizado correctamente</p>
+            <p className="text-xs text-green-600 mt-0.5">Tu nuevo plan ya está activo. Las auditorías adicionales ya están disponibles.</p>
+          </div>
+        </div>
+      )}
       <CountdownBanner />
 
       <div className="flex items-center justify-between">
