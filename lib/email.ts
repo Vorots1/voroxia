@@ -1,6 +1,10 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let _resend: Resend | null = null
+function getResend(): Resend {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY)
+  return _resend
+}
 const FROM = 'Voroxia <alertas@voroxia.com>'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://voroxia.com'
 
@@ -20,7 +24,7 @@ export async function sendRegressionAlert({
   const drop = previousScore - newScore
   const auditUrl = `${APP_URL}/audits/${auditId}`
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to,
     subject: `⚠️ Regresión detectada en "${assistantName}" — score bajó ${drop} puntos`,
@@ -122,7 +126,7 @@ export async function sendReauditSummary({
   const statusColor = score >= 75 ? '#15803d' : score >= 50 ? '#b45309' : '#dc2626'
   const statusLabel = score >= 75 ? 'Conforme' : score >= 50 ? 'Parcialmente conforme' : 'No conforme'
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to,
     subject: `✅ Re-auditoría completada: "${assistantName}" — score ${score}/100`,

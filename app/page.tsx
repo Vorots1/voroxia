@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import LandingCountdown from '@/components/landing/LandingCountdown'
+import LandingAnimations from '@/components/landing/LandingAnimations'
 
 /* ─────────────────────────────── Navbar ─────────────────────────────── */
 function Navbar() {
@@ -62,21 +63,21 @@ function Hero() {
       </div>
 
       <div className="relative max-w-5xl mx-auto px-6 text-center">
-        <Badge className="mb-6 bg-blue-900/50 text-blue-300 border-blue-700/50 hover:bg-blue-900/50 text-xs tracking-wide">
+        <Badge className="mb-6 bg-blue-900/50 text-blue-300 border-blue-700/50 hover:bg-blue-900/50 text-xs tracking-wide gsap-hero-badge">
           EU AI Act · En vigor agosto 2026
         </Badge>
 
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight gsap-hero-title">
           Tu chatbot de IA ya es legal<br />
           <span className="text-blue-400">o ya es un riesgo.</span>
         </h1>
 
-        <p className="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
+        <p className="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed gsap-hero-desc">
           Voroxia audita tu asistente de IA en minutos. 82 preguntas automáticas, 6 dimensiones de análisis,
           score de cumplimiento y dossier legal listo para presentar.
         </p>
 
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 gsap-hero-cta">
           <Link href="/register">
             <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white px-8 gap-2 text-base h-12">
               Auditar gratis ahora
@@ -95,7 +96,7 @@ function Hero() {
         </p>
 
         {/* Score preview card */}
-        <div className="mt-16 max-w-2xl mx-auto bg-slate-900 border border-white/10 rounded-2xl p-6 text-left shadow-2xl">
+        <div className="mt-16 max-w-2xl mx-auto bg-slate-900 border border-white/10 rounded-2xl p-6 text-left shadow-2xl gsap-hero-card">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-xs text-slate-500 uppercase tracking-wider">Ejemplo de informe</p>
@@ -134,18 +135,23 @@ function Hero() {
 /* ─────────────────────────────── Stats bar ─────────────────────────────── */
 function StatsBar() {
   const stats = [
-    { value: '82', label: 'preguntas por auditoría' },
-    { value: '6', label: 'dimensiones analizadas' },
-    { value: '€35M', label: 'multa máxima EU AI Act' },
-    { value: '<5 min', label: 'para tener resultados' },
+    { value: '82', label: 'preguntas por auditoría', target: '82' },
+    { value: '6', label: 'dimensiones analizadas', target: '6' },
+    { value: '€35M', label: 'multa máxima EU AI Act', target: null },
+    { value: '<5 min', label: 'para tener resultados', target: null },
   ]
 
   return (
     <section className="bg-slate-900 border-y border-white/5">
       <div className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-6">
-        {stats.map(({ value, label }) => (
+        {stats.map(({ value, label, target }) => (
           <div key={label} className="text-center">
-            <p className="text-2xl sm:text-3xl font-bold text-white">{value}</p>
+            <p
+              className="text-2xl sm:text-3xl font-bold text-white gsap-stat-value"
+              {...(target ? { 'data-target': target } : {})}
+            >
+              {value}
+            </p>
             <p className="text-sm text-slate-500 mt-1">{label}</p>
           </div>
         ))}
@@ -178,7 +184,7 @@ function Problem() {
     <section className="bg-white py-20">
       <div className="max-w-5xl mx-auto px-6">
         <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 gsap-section-title">
             ¿Cuándo fue la última vez que auditaste tu chatbot?
           </h2>
           <p className="mt-4 text-lg text-gray-500 max-w-xl mx-auto">
@@ -188,7 +194,7 @@ function Problem() {
 
         <div className="grid md:grid-cols-3 gap-8">
           {pains.map(({ icon, title, body }) => (
-            <div key={title} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+            <div key={title} className="bg-gray-50 rounded-2xl p-6 border border-gray-100 gsap-card">
               <div className="mb-4">{icon}</div>
               <h3 className="text-base font-semibold text-gray-900 mb-2">{title}</h3>
               <p className="text-sm text-gray-600 leading-relaxed">{body}</p>
@@ -224,7 +230,7 @@ function HowItWorks() {
     <section id="como-funciona" className="bg-slate-50 py-20">
       <div className="max-w-5xl mx-auto px-6">
         <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Cómo funciona</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 gsap-section-title">Cómo funciona</h2>
           <p className="mt-4 text-gray-500 max-w-lg mx-auto">
             Tres pasos. Menos de cinco minutos. Sin instalar nada.
           </p>
@@ -235,7 +241,7 @@ function HowItWorks() {
           <div className="hidden md:block absolute top-10 left-[calc(16.67%+16px)] right-[calc(16.67%+16px)] h-px bg-blue-100" />
 
           {steps.map(({ step, title, body }) => (
-            <div key={step} className="relative flex flex-col items-center text-center">
+            <div key={step} className="relative flex flex-col items-center text-center gsap-step">
               <div className="relative z-10 w-20 h-20 rounded-2xl bg-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-blue-200">
                 <span className="text-2xl font-bold text-white">{step}</span>
               </div>
@@ -294,7 +300,7 @@ function Phases() {
     <section id="fases" className="bg-white py-20">
       <div className="max-w-5xl mx-auto px-6">
         <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 gsap-section-title">
             6 dimensiones de análisis
           </h2>
           <p className="mt-4 text-gray-500 max-w-xl mx-auto">
@@ -304,7 +310,7 @@ function Phases() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {phases.map(({ icon, name, color, desc }) => (
-            <div key={name} className="border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow">
+            <div key={name} className="border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow gsap-card">
               <div className={`inline-flex items-center gap-2 text-sm font-semibold px-3 py-1.5 rounded-full mb-3 ${color}`}>
                 {icon}
                 {name}
@@ -440,7 +446,7 @@ function Pricing() {
     <section id="precios" className="bg-gray-50 py-20">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Precios transparentes</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 gsap-section-title">Precios transparentes</h2>
           <p className="mt-4 text-gray-500">
             Sin permanencia. Cancela cuando quieras.
           </p>
@@ -450,7 +456,7 @@ function Pricing() {
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`rounded-2xl p-6 flex flex-col relative ${
+              className={`rounded-2xl p-6 flex flex-col relative gsap-card ${
                 plan.highlight
                   ? 'bg-blue-600 text-white shadow-xl shadow-blue-200 ring-2 ring-blue-600'
                   : 'bg-white border border-gray-200'
@@ -543,12 +549,12 @@ function SocialProof() {
     <section className="bg-white py-20">
       <div className="max-w-5xl mx-auto px-6">
         <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Lo que dicen nuestros clientes</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 gsap-section-title">Lo que dicen nuestros clientes</h2>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
           {testimonials.map(({ name, role, text, score }) => (
-            <div key={name} className="bg-gray-50 border border-gray-100 rounded-2xl p-6">
+            <div key={name} className="bg-gray-50 border border-gray-100 rounded-2xl p-6 gsap-card">
               <div className="flex gap-0.5 mb-4">
                 {Array.from({ length: score }).map((_, i) => (
                   <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -626,13 +632,13 @@ function FinalCTA() {
   return (
     <section className="bg-blue-600 py-20">
       <div className="max-w-3xl mx-auto px-6 text-center">
-        <h2 className="text-3xl sm:text-4xl font-bold text-white">
+        <h2 className="text-3xl sm:text-4xl font-bold text-white gsap-section-title">
           Tu primera auditoría es gratis.
         </h2>
-        <p className="mt-4 text-blue-100 text-lg">
+        <p className="mt-4 text-blue-100 text-lg gsap-hero-desc">
           Descubre el estado real de tu chatbot en menos de 5 minutos.
         </p>
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 gsap-hero-cta">
           <Link href="/register">
             <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 px-10 h-12 text-base font-semibold">
               Auditar ahora — es gratis
@@ -688,6 +694,7 @@ export default function LandingPage() {
   return (
     <>
       <Navbar />
+      <LandingAnimations />
       <main>
         <Hero />
         <StatsBar />
