@@ -1,8 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/cron/reaudit",
-      "schedule": "0 3 * * *"
-    }
-  ]
-}
+{}
